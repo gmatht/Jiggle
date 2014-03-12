@@ -1,0 +1,677 @@
+<html>
+<!--
+This implement the 3D steroscopic Red/Cyan view suggested by <a href="http://www.site.uottawa.ca/~edubois/anaglyph/LeastSquaresHowToPhotoshop.pdf">Dubois</a></br>.
+This is designed for CRTs, but seems to work fine on LCD monitors as well.
+
+Adding support for SIMD may make it faster
+http://www.2ality.com/2013/12/simd-js.html
+-->
+<style type="text/css">
+	img.big {max-height:95%;}
+span.tall {
+    display:inline-block;
+    transform:scale(1,2); /* W3C */
+    -webkit-transform:scale(1,2); /* Safari and Chrome */
+    -moz-transform:scale(1,2); /* Firefox */
+    -ms-transform:scale(1,2); /* IE 9 */
+    -o-transform:scale(1,2); /* Opera */
+}
+span.thin {
+    display:inline-block;
+    transform:scale(0.5,1); /* W3C */
+    -webkit-transform:scale(0.5,1); /* Safari and Chrome */
+    -moz-transform:scale(0.5,1); /* Firefox */
+    -ms-transform:scale(0.5,1); /* IE 9 */
+    -o-transform:scale(0.5,1); /* Opera */
+}
+body { margin: 0; padding: 0; }
+</head>
+</style><style type="text/css"></style>
+<script type="text/javascript">
+try {
+	var foo=document.createElement("canvas").getContext('2d');
+} catch (e) {
+//if (!isCanvasSupported()){
+
+function all_options () {
+  var r = RegExp ('([?&].*)');
+  return (window.location.href.match (r) || ['', ""])[1];
+}
+
+function options () {
+  name = RegExp ('(..*)');
+  return (window.location.href.match (name) || ['foo', "bar"])[1];
+}
+
+
+document.write('<p>Oh dear, your browser does\'nt support Canvas at all. I don\'t know why that would be, unless you are running an ancient crappy browser like Internet Explorer 8. If so, I feel really sorry for you, but don\'t worry kid. Here is a nickel; why don\'t you download <a href="http://www.google.com/chrome">a</a> <a href="http://www.mozilla.org/firefox/">real</a> <a href="http://www.opera.com/">browser</a>? :P</p><p>But seriously, security updates for Windows XP end in April 2014 and Microsoft won\'t even try to stop the tide of viruses overrunning your machine. You should probably at least think of switching to a browser that will still have security updates.</p><p>In any case there is a old buggy version of this webpage that may go well with your browser: <a href="oldbuggy.html'+all_options()+'">Enjoy!</a></p>'); 
+}
+//}
+</script>
+
+
+<script type="text/javascript">
+//document.createElement("canvas").getContext('2d')||
+
+try {
+ document.execCommand('BackgroundImageCache', false, true);
+ //document.execCommand('BackgroundImageCache', true, true);
+ }
+ catch(e) {};
+
+function gup (name,def) {
+  name = RegExp ('[?&]' + name.replace (/([[\]])/, '\\$1') + '=([^&#]*)');
+  return (window.location.href.match (name) || ['', def])[1];
+}
+
+var allimages=["DSCF3344", "DSCF3345", "DSCF3346", "DSCF3348", "DSCF3352", "DSCF3353", "DSCF3354", "DSCF3355", "DSCF3356", "DSCF3361", "DSCF3364", "DSCF3365", "DSCF3367", "DSCF3371", "DSCF3372", "DSCF3373", "DSCF3375", "DSCF3378", "DSCF3379", "DSCF3380", "DSCF3381", "DSCF3383", "DSCF3384", "DSCF3386", "DSCF3388", "DSCF3389", "DSCF3391", "DSCF3393", "DSCF3394", "DSCF3395", "DSCF3396", "DSCF3398", "DSCF3399", "DSCF3400", "DSCF3401", "DSCF3402", "DSCF3403", "DSCF3404", "DSCF3405", "DSCF3406", "DSCF3407", "DSCF3408", "DSCF3409", "DSCF3410", "DSCF3411", "DSCF3412", "DSCF3413", "DSCF3414", "DSCF3415", "DSCF3416", "DSCF3419", "DSCF3420", "DSCF3421", "DSCF3422", "DSCF3424", "DSCF3425", "DSCF3426", "DSCF3427", "DSCF3428", "DSCF3429", "DSCF3430", "DSCF3431", "DSCF3432", "DSCF3433", "DSCF3434", "DSCF3437", "DSCF3438", "DSCF3439", "DSCF3440", "DSCF3441", "DSCF3443", "DSCF3444", "DSCF3445", "DSCF3446", "DSCF3447", "DSCF3448", "DSCF3449", "DSCF3450", "DSCF3451", "DSCF3452", "DSCF3453", "DSCF3454", "DSCF3455", "DSCF3456", "DSCF3457", "DSCF3458", "DSCF3459", "DSCF3460", "DSCF3461", "DSCF3462", "DSCF3463", "DSCF3464", "DSCF3465", "DSCF3466", "DSCF3468", "DSCF3469", "DSCF3470", "DSCF3471", "DSCF3472", "DSCF3474", "DSCF3477", "DSCF3479", "DSCF3480", "DSCF3481", "DSCF3482", "DSCF3483", "DSCF3484", "DSCF3485", "DSCF3486", "DSCF3488", "DSCF3489", "DSCF3490", "DSCF3491", "DSCF3492", "DSCF3493", "DSCF3494", "DSCF3495", "DSCF3496", "DSCF3497", "DSCF3508", "DSCF3509", "DSCF3510", "DSCF3512", "DSCF3514", "DSCF3516", "DSCF3517", "DSCF3518", "DSCF3519", "DSCF3520", "DSCF3522", "DSCF3523", "DSCF3525", "DSCF3527", "DSCF3528", "DSCF3529", "DSCF3530", "DSCF3531", "DSCF3532", "DSCF3533", "DSCF3534", "DSCF3536", "DSCF3537", "DSCF3538", "DSCF3539", "IMAG0464", "IMAG0465", "IMAG0467", "IMAG0470", "IMAG0471", "IMAG0476", "IMAG0477", "IMAG0480", "IMAG0481", "IMAG0482", "IMAG0483", "IMAG0484", "IMAG0485", "IMAG0487", "IMG1957", "IMG1958", "IMG1959", "IMG1960", "IMG1961", "IMG1962", "IMG1963", "IMG1964", "IMG1965", "IMG1966", "IMG1967", "IMG1968", "IMG1969", "IMG1970", "IMG1971", "IMG1973", "IMG1974", "IMG1975", "IMG1976", "IMG1977", "IMG1978"];
+
+var ox_default={"DSCF3346":-230, "DSCF3403":402, "DSCF3516":-132, "DSCF3437":1916, "IMG1974":-250, "IMAG0470":67, "DSCF3391":-77, "DSCF3375":-167, "DSCF3427":-223, "DSCF3443":-195, "DSCF3433":-14, "DSCF3514":-257, "DSCF3509":-396, "DSCF3458":-21, "DSCF3422":-223, "DSCF3393":152, "DSCF3519":-278, "DSCF3430":187, "DSCF3494":333, "DSCF3399":-195, "IMG1966":-625, "DSCF3468":340, "DSCF3441":458, "IMAG0465":67, "DSCF3532":381, "DSCF3472":-56, "DSCF3407":-14, "DSCF3447":194, "DSCF3355":-174, "IMAG0476":88, "DSCF3510":-375, "IMG1962":-250, "DSCF3512":-348, "DSCF3365":-160, "IMAG0484":98, "DSCF3414":-174, "DSCF3354":-139, "DSCF3413":138, "DSCF3344":-257, "DSCF3477":-271, "DSCF3492":97, "DSCF3416":-84, "IMG1969":-174, "DSCF3463":-167, "DSCF3386":-223, "DSCF3484":-244, "DSCF3465":34, "DSCF3388":-452, "DSCF3425":-223, "DSCF3352":69, "IMG1960":-181, "DSCF3529":500, "DSCF3450":111, "IMG1978":-237, "DSCF3456":291, "DSCF3438":-271, "IMG1970":-174, "DSCF3448":-125, "DSCF3533":187, "IMAG0464":67, "IMG1973":-237, "DSCF3530":486, "DSCF3432":215, "DSCF3405":166, "DSCF3538":-105, "IMAG0487":93, "DSCF3483":-230, "DSCF3428":-223, "DSCF3420":-230, "DSCF3380":-91, "IMAG0471":26, "DSCF3461":250, "IMG1965":-348, "DSCF3488":187, "DSCF3528":-216, "DSCF3451":1618, "DSCF3497":-278, "DSCF3410":-91, "DSCF3454":173, "DSCF3364":-146, "DSCF3481":-355, "DSCF3398":256, "DSCF3474":312, "DSCF3431":62, "DSCF3462":97, "IMG1959":-250, "DSCF3402":-125, "DSCF3523":-438, "IMG1967":-348, "DSCF3389":-139, "IMG1961":-230, "IMG1976":-230, "DSCF3424":-209, "IMG1975":-223, "DSCF3489":506, "DSCF3490":131, "DSCF3525":-494, "DSCF3495":729, "IMAG0467":93, "DSCF3426":-223, "DSCF3345":-244, "DSCF3469":277, "DSCF3536":-195, "DSCF3383":13, "IMG1957":-285, "DSCF3394":701, "DSCF3415":-195, "DSCF3445":-56, "IMAG0477":57, "DSCF3479":-271, "DSCF3517":-244, "DSCF3379":0, "DSCF3466":13, "IMAG0485":62, "IMG1964":-167, "DSCF3485":-209, "DSCF3449":1034, "IMG1963":-223, "DSCF3429":-139, "DSCF3493":479, "DSCF3522":-438, "DSCF3455":34, "DSCF3539":-139, "IMG1958":-195, "DSCF3373":-63, "DSCF3491":361, "DSCF3439":472, "DSCF3356":-264, "IMG1971":-237, "DSCF3367":-84, "IMG1977":-244, "DSCF3353":-112, "DSCF3348":-257, "IMG1968":-160, "DSCF3482":-195, "DSCF3457":118, "DSCF3400":76, "DSCF3434":0, "DSCF3464":-160, "DSCF3508":-306, "DSCF3378":-56, "IMAG0480":78, "DSCF3496":-313, "DSCF3421":-202, "DSCF3480":-250, "DSCF3534":222, "DSCF3404":930, "DSCF3453":83, "DSCF3537":-105, "DSCF3412":-21, "null":0}
+
+var imageData;
+var image_loop=0;
+var image_loop_max=8;
+var image_loop_order=[0,4,2,6,1,5,3,7];
+
+
+
+var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth,
+    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+var navigation_bar_width=120;
+
+var imagenumber=parseInt(gup("i","1"));
+if (isNaN(imagenumber)) {
+	imagenumber=allimages.indexOf(gup("i",""));
+} else {
+}
+var type=(gup("t","w"));
+var delay=gup("d",100);
+var image=allimages[imagenumber];
+var m ="";
+//if (screen.height<1000||screen.width<1000||x<1000||y<850) { 
+if (x<1000||y<850) { 
+	m="m";
+	img_height=1080;
+	img_width=1440;
+} else {
+	img_height=600;
+	img_width=800;
+}
+
+if (type=="s") {
+	img_width/=2;
+}
+
+//console.log("h: "+screen.height+" w:"+screen.width+" x:"+x+" y:"+y); 
+
+
+
+/* Preloading images */
+var imageObjs= new Array();
+var img0;
+
+function preload(images) {
+	for(i=0; i<images.length;i++) {
+		if (type!="") {
+			if ("wlsd".search(type)>-1) { 
+				var image1 = new Image();
+				//image1.onload = set_size;
+				//Actually I think the fixed width works well enough.
+				image1.src = images[i]+"_l"+m+".jpg";
+				imageObjs.push(image1);
+			}
+			if ("wrsd".search(type)>-1) { 
+				var image2 = new Image();
+				image2.src = images[i]+"_r"+m+".jpg";
+				imageObjs.push(image2);
+			}
+	 	}
+	}
+}
+
+function keyHandler( e ) {
+	if( !e ) {
+		e = window.event;
+	}
+	
+	arrowUp = 38;
+	arrowDown = 40;
+	arrowLeft = 37;
+	arrowRight = 39;
+	
+	switch( e.keyCode )
+	{
+		case arrowUp:
+			//Do something
+		break;
+		case arrowDown:
+		//Do something
+		break;
+		case arrowLeft:
+		location.replace(prevurl);
+		//document.location=prevurl;
+		break;
+		case arrowRight:
+		location.replace(prevurl);
+		//document.location=prevurl;
+		break;
+	}
+}
+
+document.onkeydown = keyHandler;
+
+var prevurl;
+var nexturl;
+var links_html;
+
+function init_1() {
+        var i = imagenumber;
+	var n = allimages.length;
+	
+	prevurl="?i="+allimages[(i-1+n)%n]+"&t="+type;
+	nexturl="?i="+allimages[(i+1+n)%n]+"&t="+type;
+	thisurl="?i="+allimages[i]+"&t="+type;
+
+	var upurl="i.html";
+	if (type == "d") {
+		upurl="i.rc.html";
+	}
+	i=allimages[i];
+	var ox=gup("ox","null");
+	if (ox == "null") {
+		ox='';
+	} else {
+		ox='&ox='+ox
+	}
+		
+	links_html=
+	        'Navigation:<br/>'+
+		' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="'+upurl+'">^Up</a><br/>'+
+		' <a href="'+prevurl+'">&lt;Prev</a>&nbsp;'+
+		'<a href="'+nexturl+'">Next&gt;</a><br/><br/> '+
+		' Format:<br/> ' + 
+		'<a href="?i='+i+'&t=w'+ox+'";>Wiggle</a><br/> '+
+		'<a href="?i='+i+'&t=d'+ox+'">RedCyan</a><br/> '+
+		'<a href="?i='+i+'&t=s'+ox+'">Split</a><br/> '+
+		'<a href="?i='+i+'&t=l'+ox+'">Left</a><br/> '+
+		'<a href="?i='+i+'&t=r'+ox+'">Right</a><br/> '+
+		'<a href="'+allimages[i]+'.mpo">Raw</a><br/> '+
+		'<form name="delphoto" action="https://mccabedj.ucc.asn.au/cgi-bin/delphoto.cgi" method="GET">'+
+		'<div align="center"><br/><br/>'+
+		'<input type="submit" name="cmd" value="+">'+
+		'<input type="submit" name="cmd" value="-"><br/>'+
+		'<input type="text" size="7" name="r" value=""></br>'+
+		'<input type="submit" name="cmd" value="Comment"></br>'+
+		'<input type="submit" name="cmd" value="Delete"></br>'+
+		'<input id="i" type="hidden" name="d" value="DSCF3349">'+
+		'<br><br>'+
+		'</div>'+
+		'</form>'+
+		'';
+}
+init_1();
+
+function dw(t) {document.write(t);}
+
+html_wh='width="'+img_width+'" height="'+img_height+'"';
+
+if (type=='s') {
+	links_html='<span class="tall">'+links_html+'<span/>';
+}
+
+function gen_html(imghtml,id) {
+	if (type=="s") {
+		valign=">";
+	} else {
+		valign=' valign="top">';
+	}
+		
+	return('<table border="0px" cellspacing="0" cellpadding="0"><tr><td'+valign+
+	links_html+'<span id="'+id+'">Loading</span>\
+	<td>&nbsp;</td>\
+	</td><td>'+
+	imghtml+
+	'</td></tr></table>');
+}
+
+var image_l = new Image();
+var image_r = new Image();
+
+if (type != 'r' ) {
+	image_l.onload = onload_img;
+	image_l.src = image+'_l'+m+'.jpg';
+} 
+if (type != 'l' ) {
+	image_r.onload = onload_img;
+	image_r.src = image+'_r'+m+'.jpg';
+}
+
+switch(type) {
+	case "l": dw(gen_html('<img src="'+image_l.src+'"/>','p')); break;
+	case "r": dw(gen_html('<img src="'+image_r.src+'"/>','p')); break;
+	case "d": case "w": 
+		dw(gen_html('<canvas id="canvas1" width="'+img_width+'" height="'+img_height+'"></canvas>','p'));
+	break;
+	case "s":
+		dw(
+'<table border="0" width="100%"><tr align="left">'+
+		               '<th align="left">'+
+//<span class="thin">Y<br/>'+
+		gen_html('<canvas id="canvas1" width="'+img_width+'" height="'+img_height+'"></canvas>','p3')+
+		'</th>'+'<th align="left">'+
+		gen_html('<canvas id="canvas_r" width="'+img_width+'" height="'+img_height+'"></canvas>','p2')+
+		'</th></table>'
+);
+	break;
+}
+
+document.getElementById( "i" ).value = allimages[imagenumber];
+
+var canvas = document.getElementById('canvas1');
+//var canvas_l = document.getElementById('canvas2');
+//var canvas_r = document.getElementById('canvas3');
+var canvas_l = document.createElement('canvas');
+var canvas_r;
+if (type == 's') {
+	 canvas_r=document.getElementById('canvas_r');
+} else {
+	 canvas_r=document.createElement('canvas');
+}
+	
+var context_l = canvas_l.getContext('2d');
+var context_r = canvas_r.getContext('2d');
+var num_loaded = 0;
+var img_offset_x = 0;
+var img_offset_x_ratio = 0;
+var element = document.getElementById("canvas1");
+var c = element.getContext("2d");
+
+var wiggle_show_left_image = false;
+var wiggle_delay = 100;
+
+
+var dragging = true;
+var img_offset_orig_x;
+var mouse_orig_x;
+var mouse_orig_y;
+
+const _matrices = [
+	437, 449, 164,
+	62, -62, -24,
+	48, -50, -17,
+
+	-11, -32, -7,      
+	377, 761, 9,
+	-26, -93, 1234
+];
+var matrices = _matrices;
+if (typeof Int32Array == undefined) {
+	matrices = _matrices;
+} else {
+try {
+	var buffer = new ArrayBuffer(4 * 18);
+	matrices = new Int32Array(buffer);
+	for (i = 0; i < 18; i++) {
+		matrices[i] = _matrices[i];
+	}
+	for (m = 0; m<1; m++) {
+		for (c1 = 0; c1<3; c1++) {
+			for (c2 = 0; c2<3; c2++) {
+				matrices[c1+(c2*3)+(m+9)] = _matrices[c1+(c2*3)+(m+9)];
+			}
+		}
+	}
+} catch (err) {
+	matrices = _matrices;
+}}
+	
+const max_value = 1000 * 255 * 255;
+
+
+function mouseDownListener(evt) {
+	var i;
+	//console.log("Down");
+	//We are going to pay attention to the layering order of the objects so that if a mouse down occurs over more than object,
+	//only the topmost one will be dragged.
+	var highestIndex = -1;
+	
+	//getting mouse position correctly, being mindful of resizing that may have occured in the browser:
+	var bRect = canvas.getBoundingClientRect();
+	img_offset_orig_x = img_offset_x;
+	mouse_orig_x = (evt.clientX - bRect.left)*(canvas.width/bRect.width);
+	mouse_orig_y = (evt.clientY - bRect.top )*(canvas.height/bRect.height);
+		
+	dragging=true;	
+	if (dragging) {
+		window.addEventListener("mousemove", mouseMoveListener, false);
+	}
+	canvas.removeEventListener("mousedown", mouseDownListener, false);
+	window.addEventListener("mouseup", mouseUpListener, false);
+	
+	//code below prevents the mouse down from having an effect on the main browser window:
+	if (evt.preventDefault) {
+		evt.preventDefault();
+	} //standard
+	else if (evt.returnValue) {
+		evt.returnValue = false;
+	} //older IE
+	return false;
+	}
+
+
+function update_pos(evt) {
+	var posX;
+	var posY;
+	var shapeRad = 0;
+	var minX = -img_width;
+	var maxX = img_width;
+	var minY = shapeRad;
+	var maxY = canvas.height - shapeRad;
+	//getting mouse position correctly 
+	var bRect = canvas.getBoundingClientRect();
+	mouseX = (evt.clientX - bRect.left)*(canvas.width/bRect.width);
+	mouseY = (evt.clientY - bRect.top)*(canvas.height/bRect.height);
+	
+	//clamp x and y positions to prevent object from dragging outside of canvas
+	posX = mouseX - mouse_orig_x + img_offset_orig_x;
+	posX = (posX < minX) ? minX : ((posX > maxX) ? maxX : posX);
+	posY = mouseY - mouse_orig_y;
+	posY = (posY < minY) ? minY : ((posY > maxY) ? maxY : posY);
+
+	img_offset_x_ratio=Math.floor(10000.0*img_offset_x/img_width);
+	img_offset_x = Math.floor(posX);
+
+	//console.log(img_offset_x);
+}
+	
+	//img_offset_x = 0;
+
+function mouseMoveListener(evt) {
+	update_pos(evt);
+	if (type=="d") {
+		update_redcyan_fast();
+	} else {
+		drawScreen();
+	}
+}
+
+function mouseUpListener(evt) {
+	//console.log("Up");
+	update_pos(evt);
+	canvas.addEventListener("mousedown", mouseDownListener, false);
+	canvas_r.addEventListener("mousedown", mouseDownListener, false);
+	window.removeEventListener("mouseup", mouseUpListener, false);
+	if (dragging) {
+		dragging = false;
+		window.removeEventListener("mousemove", mouseMoveListener, false);
+	}
+	/*if (type=="d") {
+		drawScreen();
+	}*/
+	location.replace(thisurl+"&ox="+img_offset_x_ratio);
+}
+
+function clip(intensity) {
+	return intensity;
+}
+
+function drawScreen() {
+	switch(type) {
+		case "l":
+		break;
+
+	case "r":
+	break;
+
+	case "d":
+	update_dubois();
+	break;
+
+	case "w":
+	update_wiggle();
+	break;
+
+	case "s":
+	update_split();
+	break;
+}
+
+}
+
+function wiggle() {
+	//setInterval("wiggle()", wiggle_delay);
+	wiggle_show_left_image=!wiggle_show_left_image;
+	update_wiggle();
+}
+
+function update_wiggle() {
+	//console.log(">ih: "+img_height+" iw:"+img_width+"\n");
+	document.getElementById('p').innerHTML = "Working...";
+	var _initial = new Date();
+	if (wiggle_show_left_image) {
+		c.drawImage(image_l, 0           , 0);
+	} else {
+		c.drawImage(image_r, img_offset_x, 0);
+	}
+	var _final = new Date();
+	document.getElementById('p').innerHTML = "CPU "+(_final.getTime() - _initial.getTime())+"ms";
+	
+	//wiggle_show_left_image = !wiggle_show_left_image;
+	//c.setVisible(c.isVisible());
+}
+
+function update_split() {
+	//console.log(">ih: "+img_height+" iw:"+img_width+"\n");
+	c.drawImage(image_l, 0, 0, img_width/2, img_height);
+	document.getElementById("canvas_r").getContext("2d").drawImage(image_r, img_offset_x, 0, img_width/2, img_height);
+	var _final = new Date();
+	//document.getElementById('p').innerHTML = "Processing took "+(_final.getTime() - _initial.getTime())+"ms";
+	
+	//wiggle_show_left_image = !wiggle_show_left_image;
+	//c.setVisible(c.isVisible());
+		
+}
+
+function update_redcyan_fast() {
+	//img_offset_x*=-1;
+	document.getElementById('p').innerHTML = "Converting to Dubois";
+	var images = [context_l.getImageData(0, 0, img_width, img_height).data,
+		context_r.getImageData(0, 0, img_width, img_height).data
+	];
+	if (typeof imageData == 'undefined') {
+		imageData = c.createImageData(img_width, img_height);
+	}
+	var output = imageData.data;
+	var _initial = new Date();
+	image_loop=0;
+
+	var x_from;
+	var x_to;
+	//var index_adj;
+
+	if (img_offset_x < 0) {
+		x_from = 0;
+		x_to   = img_width+img_offset_x;
+	} else {
+		x_from = img_offset_x;
+		x_to   = img_width;
+	} 
+	
+	if (x_to > canvas1.width) {
+		x_to = canvas1.width;
+	}
+	
+	//index_adj_l2r = (img_offset_x * img_height) * 4;
+
+	//console.log("ih: "+img_height+" iw: "+img_width);
+	 
+	for (y = 0; y < img_height; y++) {
+		for (x = x_from ; x < x_to; x++) {
+			var index = (x + y  * img_width) * 4;
+			var index_r = index + (-img_offset_x * 4);
+			output[index  ] = images[0][index    ];
+			output[index+1] = images[1][index_r+1];
+			output[index+2] = images[1][index_r+2];
+			output[index+3] = images[1][index_r+3];
+		}
+	}
+	var _final = new Date();
+	c.putImageData(imageData, 0, 0); // at coords 0,0
+	document.getElementById('p').innerHTML = "CPU "+(_final.getTime() - _initial.getTime())+"ms";
+	//img_offset_x*=-1;
+}
+
+function onload_img() {
+	num_loaded++;
+	if (num_loaded > 1) {
+		//image_l.style.width = '50%'
+		//image_l.width/=2;
+		//image_r.width/=2;
+		img_height = image_l.height;
+		img_width = image_l.width;
+
+		if (typeof ox_default[image] == 'undefined') {
+			img_offset_x_ratio=0;
+		} else {
+			img_offset_x_ratio=ox_default[image];
+		}
+			
+		img_offset_x_ratio = gup("ox",img_offset_x_ratio);
+		img_offset_x=Math.floor((img_width/10000.0)*img_offset_x_ratio);
+
+		//console.log("ih: "+img_height+" iw:"+img_width);
+
+		if (type=='s') {
+			width=image_l.width/2;
+		} else {
+			width=image_l.width;
+		}
+
+		canvas1.height = img_height; canvas1.width = width;
+		canvas_l.height = img_height; canvas_l.width = width;
+		canvas_r.height = img_height; canvas_r.width = width;
+		//canvas3.height = img_height; canvas3.width = width;
+
+		var max_width=1920;
+		if (type == 's') {
+			max_width=max_width/2;
+		}
+		max_width=max_width-86;
+		
+		if (width > max_width ) {
+			canvas1.width=max_width;
+			if (type == 's') {
+				canvas_r.width=max_width;
+			}
+		} 
+		context_l.drawImage(image_l, 0, 0);
+		context_r.drawImage(image_r, 0, 0);
+
+		if (type=="d") {
+			update_redcyan_fast();
+			setTimeout("drawScreen()", 10);
+			//update_dubois();
+		} else {
+			drawScreen()
+		}
+	}
+}
+
+image_l.onload = onload_img;
+image_r.onload = onload_img;
+
+
+function update_dubois() {
+	document.getElementById('p').innerHTML = "Converting to Dubois";
+	var images = [context_l.getImageData(0, 0, img_width, img_height).data,
+		context_r.getImageData(0, 0, img_width, img_height).data
+	];
+	//var imageData = c.createImageData(img_width, img_height);
+	var output = imageData.data;
+	var _initial = new Date();
+
+	var x_from;
+	var x_to;
+
+	//img_offset_x*=-1;
+	img_offset_x=Math.floor(img_offset_x);
+	img_offset_x=Math.floor(img_offset_x);
+	if (img_offset_x < 0) {
+		x_from = 0;
+		x_to   = img_width+img_offset_x;
+	} else {
+		x_from = +img_offset_x;
+		x_to   = img_width;
+	} 
+
+	if (x_to > canvas1.width) {
+		x_to = canvas1.width;
+	}
+	
+	//index_adj_l2r = (img_offset_x * img_height) * 4;
+       
+	for (y = image_loop_order[image_loop]; y < img_height; y+=image_loop_max) {
+		for (x = x_from ; x < x_to; x++) {
+			var index_o = (x + y  * img_width) * 4;
+			var index_r = index_o + (-img_offset_x * 4);
+			var index_l = index_o
+			var indexs  = [index_l, index_r];
+			for (c1 = 0; c1 < 3; c1++) {
+				// red=0, green=1, blue=2;
+				total_intensity = 0;
+				for (i = 0; i < 2; i++) {
+					//i=0: left image, i=1: right image
+					intensity = 0;
+					index=indexs[i];
+					for (c2 = 0; c2 < 3; c2++) {
+						input_intensity = images[i][index + c2];
+						//The following is a quick gamma conversion assuming gamma about 2.0
+						input_intensity = input_intensity * input_intensity;
+						//The following would be a little bit better, but also much slower:
+						//GAMMA=2.2
+						//input_intensity=Math.pow(input_intensity,GAMMA);
+						//... imageData.data[index+c1] = Math.pow(total_intensity/1000,1.0/GAMMA);
+						intensity += matrices[(i * 9) + (c1 * 3) + c2] * input_intensity;
+					}
+					if (intensity > max_value) { intensity=max_value; }
+					else if (intensity < 0) { intensity=0; }
+
+					intensity = clip(intensity);
+					total_intensity += intensity;
+				}
+				//total_intensity = clip(total_intensity);
+				//If we have a linear space use the following:
+				//imageData.data[index+c1] = Math.floor(Math.sqrt(total_intensity/1000));
+				output[index_o + c1] = Math.sqrt(total_intensity / 1000);
+				//imageData.data[index+c1] = (total_intensity/1000);
+			}
+			output[index_o + 3] = 255; //Make opaque
+		}
+	}
+	var _final = new Date();
+	c.putImageData(imageData, 0, 0); // at coords 0,0
+	document.getElementById('p').innerHTML = "CPU "+(_final.getTime() - _initial.getTime())+"ms";
+	image_loop++;
+	if (image_loop<image_loop_max) {
+		setTimeout(update_dubois,1);
+	}
+	//img_offset_x*=-1;
+}
+
+canvas.addEventListener("mousedown", mouseDownListener, false);
+canvas_r.addEventListener("mousedown", mouseDownListener, false);
+
+if (type=="w") {
+	setInterval("wiggle()", wiggle_delay);
+};
+
+//If images haven't loaded in 10 seconds, maybe the "load" event has become lost?
+//setTimeout(update_dubois, 10000)
+</script>
+
+</html>

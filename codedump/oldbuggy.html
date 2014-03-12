@@ -1,0 +1,280 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+
+
+
+<!--
+echo -n 'var allimages=['; ls DSCF*_l.jpg | sed s/_l.jpg// | sed 's/^/"/' | sed 's/$/",/' |
+tr '\n' ' ' | sed 's/, $/];/' ; echo
+
+Version 0.1
+-->
+
+<script>
+
+try {
+ document.execCommand('BackgroundImageCache', false, true);
+ //document.execCommand('BackgroundImageCache', true, true);
+ }
+ catch(e) {};
+
+var c = 1;
+function gup (name,def) {
+  name = RegExp ('[?&]' + name.replace (/([[\]])/, '\\$1') + '=([^&#]*)');
+  return (window.location.href.match (name) || ['', def])[1];
+}
+var allimages=["DSCF3344", "DSCF3345", "DSCF3346", "DSCF3348", "DSCF3349", "DSCF3352", "DSCF3353", "DSCF3354", "DSCF3355", "DSCF3356", "DSCF3361", "DSCF3362", "DSCF3364", "DSCF3365", "DSCF3367", "DSCF3371", "DSCF3372", "DSCF3373", "DSCF3375", "DSCF3378", "DSCF3379", "DSCF3380", "DSCF3381", "DSCF3383", "DSCF3384", "DSCF3386", "DSCF3388", "DSCF3389", "DSCF3391", "DSCF3393", "DSCF3394", "DSCF3395", "DSCF3396", "DSCF3398", "DSCF3399", "DSCF3400", "DSCF3401", "DSCF3402", "DSCF3403", "DSCF3404", "DSCF3405", "DSCF3406", "DSCF3407", "DSCF3408", "DSCF3409", "DSCF3410", "DSCF3411", "DSCF3412", "DSCF3413", "DSCF3414", "DSCF3415", "DSCF3416", "DSCF3419", "DSCF3420", "DSCF3421", "DSCF3422", "DSCF3424", "DSCF3425", "DSCF3426", "DSCF3427", "DSCF3428", "DSCF3429", "DSCF3430", "DSCF3431", "DSCF3432", "DSCF3433", "DSCF3434", "DSCF3437", "DSCF3438", "DSCF3439", "DSCF3440", "DSCF3441", "DSCF3443", "DSCF3444", "DSCF3445", "DSCF3446", "DSCF3447", "DSCF3448", "DSCF3449", "DSCF3450", "DSCF3451", "DSCF3452", "DSCF3453", "DSCF3454", "DSCF3455", "DSCF3456", "DSCF3457", "DSCF3458", "DSCF3459", "DSCF3460", "DSCF3461", "DSCF3462", "DSCF3463", "DSCF3464", "DSCF3465", "DSCF3466", "DSCF3468", "DSCF3469", "DSCF3470", "DSCF3471", "DSCF3472", "DSCF3474", "DSCF3477", "DSCF3479", "DSCF3480", "DSCF3481", "DSCF3482", "DSCF3483", "DSCF3484", "DSCF3485", "DSCF3486", "DSCF3488", "DSCF3489", "DSCF3490", "DSCF3491", "DSCF3492", "DSCF3493", "DSCF3494", "DSCF3495", "DSCF3496", "DSCF3497", "DSCF3508", "DSCF3509", "DSCF3510", "DSCF3512", "DSCF3514", "DSCF3516", "DSCF3517", "DSCF3518", "DSCF3519", "DSCF3520", "DSCF3522", "DSCF3523", "DSCF3525", "DSCF3527", "DSCF3528", "DSCF3529", "DSCF3530", "DSCF3531", "DSCF3532", "DSCF3533", "DSCF3534", "DSCF3536", "DSCF3537", "DSCF3538", "DSCF3539", "IMAG0464", "IMAG0465", "IMAG0467", "IMAG0470", "IMAG0471", "IMAG0476", "IMAG0477", "IMAG0480", "IMAG0481", "IMAG0482", "IMAG0483", "IMAG0484", "IMAG0485", "IMAG0487", "IMG1957", "IMG1958", "IMG1959", "IMG1960", "IMG1961", "IMG1962", "IMG1963", "IMG1964", "IMG1965", "IMG1966", "IMG1967", "IMG1968", "IMG1969", "IMG1970", "IMG1971", "IMG1973", "IMG1974", "IMG1975", "IMG1976", "IMG1977", "IMG1978"];
+
+var imagenumber=parseInt(gup("i","1"));
+if (isNaN(imagenumber)) {
+	imagenumber=allimages.indexOf(gup("i",""));
+} else {
+}
+var type=(gup("t","w"));
+var delay=gup("d",100);
+var image=allimages[imagenumber];
+
+
+var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth,
+    y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+var m = ""; //set to m to use medium size 800x600px images
+if (screen.height<1000||screen.width<1000) { m="m"; } 
+
+/* Preloading images */
+var imageObjs= new Array();
+var img0;
+
+
+function set_size() {
+	var img0=imageObjs[0];
+	if ("s"==type) { 
+		var h=(y*100)/96;
+		var w=(h*(img0.width))/img0.height/2;
+		var p=(x/2)-w;
+		document.ani.style.width = w; 
+		document.aniL.style.width = w; 
+		document.aniL.style.padding = "0 "+p+" 0 0"; 
+		//document.aniL.style.height = "96%"; 
+		//document.ani.style.height = "96%"; 
+	}
+}
+
+function preload(images) {
+for(i=0; i<images.length;i++) {
+ if (type!="") {
+	if ("wls".search(type)>-1) { 
+		var image1 = new Image();
+		//image1.onload = set_size;
+		//Actually I think the fixed width works well enough.
+		image1.src = images[i]+"_l"+m+".jpg";
+		imageObjs.push(image1);
+	}
+	if ("wrs".search(type)>-1) { 
+		var image2 = new Image();
+		image2.src = images[i]+"_r"+m+".jpg";
+		imageObjs.push(image2);
+	}
+	/*
+	if ("d".search(type)) { 
+		image2.src = images[i]+".jpg";
+	*/
+	if ("d"==type) { 
+		image2.src = images[i]+"_d"+m+".jpg";
+		imageObjs.push(image1);
+	}
+	
+ }
+}
+}
+/*
+var image1 = new Image();
+image1.src = "IMAG0111_l.jpg";
+var image2 = new Image();
+image2.src = "IMAG0111_r.jpg";
+*/
+//var image3 = new Image();
+//image3.src = "a3.jpg";
+//var image4 = new Image();
+//image4.src = "a4.jpg";
+//var image5 = new Image();
+//image5.src = "a5.jpg";
+function gotoi() {
+      var a_href=window.location.href;
+      a_href = a_href.replace(/(i=)[^\&]+/, '$1' + i);
+      //<a href="#" onclick="loadUrl('http://somesite.com')">link</a>
+      loadUrl(a_href);
+}
+function go_next() {
+	loadUrl("file:///D:/D/2web2/SupaNova/Wigglescopy/test.html?i=1")
+	/*i=i+1;
+	if (i>=allimages.length) {i=0};
+	gotoi();*/
+}
+
+function go_prev() {
+	if (i=0) {i=allimages.length-1}
+	else { i=i-1; }
+}
+
+function keyHandler( e )
+{
+
+if( !e )
+{
+e = window.event;
+}
+
+arrowUp = 38;
+arrowDown = 40;
+arrowLeft = 37;
+arrowRight = 39;
+
+switch( e.keyCode )
+{
+case arrowUp:
+//Do something
+break;
+case arrowDown:
+//Do something
+break;
+case arrowLeft:
+document.location=prevurl;
+break;
+case arrowRight:
+document.location=nexturl;
+break;
+}
+}
+
+document.onkeydown = keyHandler;
+
+function disp_img()
+   {
+   if (c == 3 || type == "l")
+      { document.ani.src = image + "_l"+m+".jpg"; c = 1; }
+   else
+      { document.ani.src = image + "_r"+m+".jpg"; } c++;
+   }
+//t = setInterval("disp_img()", 100);
+
+var timer;
+var prevurl;
+var nexturl;
+function init() {
+        var i = imagenumber;
+	var n = allimages.length;
+	
+	prevurl="?i="+allimages[(i-1+n)%n]+"&t="+type;
+	nexturl="?i="+allimages[(i+1+n)%n]+"&t="+type;
+
+	var upurl="i.html";
+	if (type == "d") {
+		upurl="i.rc.html";
+	}
+	i=allimages[i];
+	//document.getElementById("links").innerHTML=
+	var links=
+	        'Navigation: '+
+		'<a href="'+prevurl+'">Prev</a> '+
+		'<a href="'+upurl+'">Up</a> '+
+		'<a href="'+nexturl+'">Next</a> '+
+		' &nbsp&nbsp&nbsp '+
+		' Format: ' + 
+		'<a href="?i='+i+'&t=w">Wiggle</a> '+
+		'<a href="?i='+i+'&t=d">RedCyan</a> '+
+		'<a href="?i='+i+'&t=s">Split</a> '+
+		'<a href="?i='+i+'&t=l">Left</a> '+
+		'<a href="?i='+i+'&t=r">Right</a> '+
+		'<a href="'+allimages[i]+'.mpo">Raw</a>';
+	if (type=="s") {
+		links= '<table border="0" width="100%"><tr align="left">'+
+				'<th><span class="tall">'+links+'</span></th>'+
+				'<th><span class="tall">'+links+'</span></th>'+
+			'</tr></table>';
+	}
+	document.getElementById("links").innerHTML=links;
+
+	document.getElementById("piclink").href= nexturl;
+	document.getElementById("piclinkL").href=prevurl;
+
+	document.getElementById( "i" ).value = allimages[imagenumber];
+
+	if (m=="m" && y>615) { 
+		document.ani.style.height = "600";
+	} else {
+		document.ani.style.height = y-45;
+	}
+
+	switch(type) {
+		case "l":
+		document.ani.src = image + "_l"+m+".jpg"; 
+		break;
+
+		case "r":
+		document.ani.src = image + "_r"+m+".jpg"; 
+		break;
+
+		case "d":
+		document.ani.src = image + "_d"+m+".jpg"; 
+		break;
+
+		case "w":
+		preload([image]);
+		setInterval("disp_img()", delay);
+		//document.ani.style.class = "big"; 
+		//document.ani.style.width = "";
+		break;
+
+		case "s":
+		document.ani.src = image + "_r.jpg"; 
+		document.ani.style.width = "39%"; 
+		document.aniL.style.width = "39%"; 
+		document.aniL.style.padding = "0 11% 0 0"; 
+		document.aniL.style.height = "96%"; 
+		document.ani.style.height = "96%"; 
+		document.aniL.src = image + "_l.jpg"; 
+		//document.main.style = "overflow:hidden; border: 0px; padding: 0; margin: 0;";
+		//document.aniL.width = "50%"; 
+		break;
+	}
+
+       	preload([allimages[(imagenumber+1)%allimages.length]]);
+}
+</script>
+
+<style type="text/css">
+	img.big {max-height:95%;}
+span.tall {
+    display:inline-block;
+    transform:scale(1,2); /* W3C */
+    -webkit-transform:scale(1,2); /* Safari and Chrome */
+    -moz-transform:scale(1,2); /* Firefox */
+    -ms-transform:scale(1,2); /* IE 9 */
+    -o-transform:scale(1,2); /* Opera */
+}
+</style></head>
+<body onload="init()" id="main" style="overflow:hidden; border: 0px; padding: 0px; margin: 0px;">
+	<span style="white-space: nowrap;"><a href="" id="piclinkL"><img class="big" name="aniL" id="aniL" width="0%" height="0" src=""></a><a href="" id="piclink"><img name="ani" id="ani" height="95%" src=""></a></span><br>
+	<!--<span style="white-space: nowrap;"><a href="" id="piclinkL"><img name="aniL" id="aniL" width="0%" height="0" src=""/></a><a href="" id="piclink"><img name="ani" id="ani" src=""/></a></span><br/>-->
+        <div id="links">Navigation: <a href="">Prev</a> <a href="">Next</a>  &nbsp;&nbsp;&nbsp;  Format: <a href="">Wiggle</a> <a href="">Split</a> <a href="">Left</a> <a href="">Right</a></div>
+
+<form name="delphoto" action="https://mccabedj.ucc.asn.au/cgi-bin/delphoto.cgi" method="GET">
+<div align="center">
+<input type="submit" name="cmd" value="+"/>
+<input type="submit" name="cmd" value="-"/>
+<input type="submit" name="cmd" value="Comment"/>
+<input type="submit" name="cmd" value="Delete"/>
+<input type="text" size="40" name="r" value=""/>
+<input id="i" type="hidden" name="d"/>
+<!--<input type="hidden" name="i"/>-->
+<br><br>
+</div>
+</form>
+</body></html>
+
