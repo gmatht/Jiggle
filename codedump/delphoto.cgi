@@ -5,6 +5,8 @@ use POSIX qw(strftime);
 #use URI::Encode qw(uri_encode uri_decode);
 use HTML::Entities;
 
+$PHOTO_BASE="/home/ucc/mccabedj/public-html/p";
+$DEL_BASE="/home/ucc/mccabedj/p/deleted";
 
     local ($buffer, @pairs, $pair, $name, $value, %FORM);
     # Read in text
@@ -26,6 +28,7 @@ use HTML::Entities;
 	$FORM{$name} = $value;
     }
     my $d = $FORM{d};
+    my $album = $FORM{a};
     my $reason  = $FORM{r};
 
 print "Content-type:text/html\r\n\r\n";
@@ -41,12 +44,28 @@ my $date = strftime "%F %X", localtime;
 
 my $encoded = encode_entities($ENV{'QUERY_STRING'}, '^A-Za-z-=&0-9,+-');
 
+if ( $album =~ /^[[:alnum:]]+$/ ) {
+	$PHOTO_DIR="$PHOTO_BASE/$album";
+	if ( ! -d $PHOTO_DIR ) {
+		print "Album `$album' does not appear to be an album";
+		exit 0;
+	}
+} else {
+	print "Malformed Album: `$album'";
+	exit 0;
+}
+
 if ($FORM{"cmd"}=~/Delete/) {
+	$DEL_DIR="$DEL_BASE/$album";
+	if ( ! -d $PHOTO_DIR ) {
+		print "Album $album not set up for deletions";
+		exit 0;
+	}
 	if ( $d =~ /^[[:alnum:]]+$/ ) {
 		#print "Looks like a photo";
 		if ( $reason =~ /./ ) {
-			system ("(cd /home/ucc/mccabedj/public-html/p/2014LinuxStaging &&
-				 (mv "."$d"."_*.jpg /home/ucc/mccabedj/p/deleted/2014LinuxStaging || true)
+			system ("(cd $PHOTO_DIR &&
+				 (mv "."$d"."_*.jpg $DEL_DIR || true)
 				 sed 's/.*\"$d\_.*//' -i.bakk i.html &&
 				 sed 's/.*\"$d\_.*//' -i.bakk i.rc.html &&
 				 #sed 's/, \"$d\"\(:[[:alnum:]-]*\)?//' -i.bakk w.html &&

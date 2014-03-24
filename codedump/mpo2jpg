@@ -1,0 +1,9 @@
+#!/bin/bash
+mkdir -p out
+for f in "$@"
+do
+   b=${f%.*} 
+   [ -e out/${b}_l.jpg ] || exiftool -trailer:all= $f -o out/${b}_l.jpg &
+   [ -e out/${b}_r.jpg ] || exiftool $f -mpimage2 -b > out/${b}_r.jpg
+   wait
+done

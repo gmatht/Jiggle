@@ -4,8 +4,9 @@ sed -i.bak "s/^var.allimages.*/$v/" w.html
 diff  w.html{.bak,}
 
 #./resizepics.sh
-./index.html.sh
+index.html.sh
 chmod a+r *
+chmod a+x .
 
 exit 0
 ./index.html.sh
@@ -14,6 +15,8 @@ chmod a+rx 1920x1080
 chmod a+r 1920x1080/*
 chmod a+rx 800x600
 chmod a+r 800x600/*
+chmod a+rx .
+chmod a+r * 
 
 ln * 1920x1080
 ln * 800x600

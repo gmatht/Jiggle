@@ -1,7 +1,8 @@
+#!/bin/bash
 set -e
 set -x
 #OUTHTML=index
-GEOM=128x128
+GEOM=196x196
 QUALITY=75
 
 OUTHTML=i
@@ -23,27 +24,28 @@ TYPE="$1";     shift;
 ALTHTML="$1";  shift;
 ALTTEXT="$*";
 
-ls | grep -Fxvf - <(ls *_l.jpg *_r.jpg *_d.jpg | sed "s/.jpg$/m.jpg/") | sed "s/..jpg$//" |
-xargs -P4 -I FILE  --verbose sh -c "
-		convert -normalize -scale 800x600 -quality $QUALITY FILE.jpg tmp_FILEm.jpg &&
-		jpegrescan2013  tmp_FILEm.jpg FILEm_tmp.jpg &&
-		mv FILEm_tmp.jpg FILEm.jpg &&
-		rm tmp_FILEm.jpg"
-# files_missing=`ls *$SUFFIX.jpg`
-false && ls | grep -Fxvf - <(ls *$INSUFFIX.jpg | sed "s/$INSUFFIX.jpg$/$SUFFIX.jpg/") | sed "s/..jpg$//" |
-	xargs -P4 -I FILE  --verbose sh -c "
-		convert -normalize -scale $GEOM -quality $QUALITY FILE.jpg FILEs.jpg"
-# &&
-#		convert -normalize -scale $GEOM -quality $QUALITY FILE.jpg tmp_FILEs.jpg"
-#		jpegrescan2013  tmp_FILEs.jpg FILEs.jpg &&
-#		rm tmp_FILEs.jpg"
+[ -e 800x600/.done ] || (resizepics.sh 800x600 *_l.jpg *_r.jpg *_d.jpg
+( cd 800x600 && for f in *.jpg; do new="../${f/.jpg/m.jpg}"; [ -e "$new" ] || ln "$f" "$new"; done )
+touch 800x600/.done )
+
+[ -e $GEOM/.done ] || (
+resizepics.sh $GEOM *_l.jpg         *_d.jpg
+( cd $GEOM   && for f in *.jpg; do new="../${f/.jpg/s.jpg}"; [ -e "$new" ] || ln "$f" "$new"; done )
+touch $GEOM/.done )
+#( cd $GEOM   && for f in *.jpg; do ln "$f" ../${f/.jpg/s.jpg}; done )
+
 (
 	echo "<html><h1>Index <a href=\"$ALTHTML.html\">($ALTTEXT)</a></h1>";
 	(i=0;
 		for ff in *_l.jpg
 		do 
 			f=${ff/_l.jpg/};
-			echo "<a href=\"w.html?i=$f$TYPE\"><img src=\"$f""$SUFFIX.jpg\" `identify $f""$SUFFIX.jpg | sed '
+			file=$f""$SUFFIX.jpg
+			if [ ! -e $f""$SUFFIX.jpg ]
+			then
+				file=$f""_ls.jpg
+			fi
+			echo "<a href=\"w.html?i=$f$TYPE\"><img src=\"$file\" `identify $file.jpg | sed '
 s/.* JPEG /width="/
 s/ .*/" /
 s/x/" height="/'`></a>";
