@@ -1,7 +1,13 @@
 #!/bin/bash
 v=`echo -n 'var allimages=['; ls *_l.jpg | sed s/_l.jpg// | sed 's/^/"/' | sed 's/$/",/' |tr '\n' ' ' | sed s/,.$// ; echo -n ]\;`
-sed -i.bak "s/^var.allimages.*/$v/" w.html
-diff  w.html{.bak,}
+for ox_s in ox oy
+do
+	ox=`get_ox.pl $ox_s`
+	sed -i.bak "s/^var.allimages.*/$v/
+	s/^var.$ox_s.default.*/$ox/
+	s/\(name=\"a\" value=\"\)[^\"]*/\1$(albumname.sh)/" w.html
+	diff  w.html{.bak,}
+done
 
 #./resizepics.sh
 index.html.sh

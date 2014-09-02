@@ -66,7 +66,8 @@ function gup (name,def) {
 
 var allimages=["DSCF3344", "DSCF3345", ...];
 
-var ox_default={"DSCF3554":-223, "DSCF3570":152, ...}
+var ox_default={"DSCF3554":-223, "DSCF3570":152}
+var oy_default={"DSCF3554":0, "DSCF3570":0}
 
 var imageData;
 var image_loop=0;
@@ -188,6 +189,14 @@ function init_1() {
 	} else {
 		ox='&ox='+ox
 	}
+	
+	var oy=gup("oy","null");
+	if (oy == "null") {
+		oy='';
+	} else {
+		oy='&oy='+oy
+		ox=ox+oy; //Hack
+	}
 		
 	links_html=
 	        'Navigation:<br/>'+
@@ -289,6 +298,9 @@ var context_r = canvas_r.getContext('2d');
 var num_loaded = 0;
 var img_offset_x = 0;
 var img_offset_x_ratio = 0;
+var img_offset_y = 0;
+var img_offset_y_ratio = 0;
+var element = document.getElementById("canvas1");
 var element = document.getElementById("canvas1");
 var c = element.getContext("2d");
 
@@ -298,6 +310,7 @@ var wiggle_delay = 100;
 
 var dragging = true;
 var img_offset_orig_x;
+var img_offset_orig_y;
 var mouse_orig_x;
 var mouse_orig_y;
 
@@ -344,6 +357,7 @@ function mouseDownListener(evt) {
 	//getting mouse position correctly, being mindful of resizing that may have occured in the browser:
 	var bRect = canvas.getBoundingClientRect();
 	img_offset_orig_x = img_offset_x;
+	img_offset_orig_y = img_offset_y;
 	mouse_orig_x = (evt.clientX - bRect.left)*(canvas.width/bRect.width);
 	mouse_orig_y = (evt.clientY - bRect.top )*(canvas.height/bRect.height);
 		
@@ -370,9 +384,9 @@ function update_pos(evt) {
 	var posY;
 	var shapeRad = 0;
 	var minX = -img_width;
-	var maxX = img_width;
-	var minY = shapeRad;
-	var maxY = canvas.height - shapeRad;
+	var maxX =  img_width;
+	var minY = -img_height;
+	var maxY =  img_height;
 	//getting mouse position correctly 
 	var bRect = canvas.getBoundingClientRect();
 	mouseX = (evt.clientX - bRect.left)*(canvas.width/bRect.width);
@@ -381,11 +395,13 @@ function update_pos(evt) {
 	//clamp x and y positions to prevent object from dragging outside of canvas
 	posX = mouseX - mouse_orig_x + img_offset_orig_x;
 	posX = (posX < minX) ? minX : ((posX > maxX) ? maxX : posX);
-	posY = mouseY - mouse_orig_y;
+	posY = mouseY - mouse_orig_y + img_offset_orig_y;
 	posY = (posY < minY) ? minY : ((posY > maxY) ? maxY : posY);
 
 	img_offset_x_ratio=Math.floor(10000.0*img_offset_x/img_width);
 	img_offset_x = Math.floor(posX);
+	img_offset_y_ratio=Math.floor(10000.0*img_offset_y/img_height);
+	img_offset_y = Math.floor(posY);
 
 	//console.log(img_offset_x);
 }
@@ -414,7 +430,7 @@ function mouseUpListener(evt) {
 	/*if (type=="d") {
 		drawScreen();
 	}*/
-	location.replace(thisurl+"&ox="+img_offset_x_ratio);
+	location.replace(thisurl+"&ox="+img_offset_x_ratio+"&oy="+img_offset_y_ratio);
 }
 
 function clip(intensity) {
@@ -457,7 +473,7 @@ function update_wiggle() {
 	if (wiggle_show_left_image) {
 		c.drawImage(image_l, 0           , 0);
 	} else {
-		c.drawImage(image_r, img_offset_x, 0);
+		c.drawImage(image_r, img_offset_x, img_offset_y);
 	}
 	var _final = new Date();
 	document.getElementById('p').innerHTML = "CPU "+(_final.getTime() - _initial.getTime())+"ms";
@@ -469,7 +485,7 @@ function update_wiggle() {
 function update_split() {
 	//console.log(">ih: "+img_height+" iw:"+img_width+"\n");
 	c.drawImage(image_l, 0, 0, img_width/2, img_height);
-	document.getElementById("canvas_r").getContext("2d").drawImage(image_r, img_offset_x, 0, img_width/2, img_height);
+	document.getElementById("canvas_r").getContext("2d").drawImage(image_r, img_offset_x, img_offset_y, img_width/2, img_height);
 	var _final = new Date();
 	//document.getElementById('p').innerHTML = "Processing took "+(_final.getTime() - _initial.getTime())+"ms";
 	
@@ -493,6 +509,8 @@ function update_redcyan_fast() {
 
 	var x_from;
 	var x_to;
+	var y_from;
+	var y_to;
 	//var index_adj;
 
 	if (img_offset_x < 0) {
@@ -502,19 +520,31 @@ function update_redcyan_fast() {
 		x_from = img_offset_x;
 		x_to   = img_width;
 	} 
+
+	if (img_offset_y < 0) {
+		y_from = 0;
+		y_to   = img_height+img_offset_y;
+	} else {
+		y_from = img_offset_y;
+		y_to   = img_height;
+	} 
 	
 	if (x_to > canvas1.width) {
 		x_to = canvas1.width;
+	}
+	if (y_to > canvas1.height) {
+		y_to = canvas1.height;
 	}
 	
 	//index_adj_l2r = (img_offset_x * img_height) * 4;
 
 	//console.log("ih: "+img_height+" iw: "+img_width);
-	 
-	for (y = 0; y < img_height; y++) {
+
+	var offset_ptr=-(img_offset_x + img_offset_y  * img_width) * 4;	 
+	for (y = y_from; y < y_to; y++) {
 		for (x = x_from ; x < x_to; x++) {
 			var index = (x + y  * img_width) * 4;
-			var index_r = index + (-img_offset_x * 4);
+			var index_r = index + offset_ptr;
 			output[index  ] = images[0][index    ];
 			output[index+1] = images[1][index_r+1];
 			output[index+2] = images[1][index_r+2];
@@ -545,6 +575,17 @@ function onload_img() {
 			
 		img_offset_x_ratio = gup("ox",img_offset_x_ratio);
 		img_offset_x=Math.floor((img_width/10000.0)*img_offset_x_ratio);
+
+		if (typeof oy_default[image] == 'undefined') {
+			img_offset_y_ratio=0;
+		} else {
+			img_offset_y_ratio=oy_default[image];
+		}
+		console.log("oyd "+oy_default[image]);
+			
+		img_offset_y_ratio = gup("oy",img_offset_y_ratio);
+		img_offset_y=Math.floor((img_width/10000.0)*img_offset_y_ratio);
+
 
 		//console.log("ih: "+img_height+" iw:"+img_width);
 
@@ -602,7 +643,6 @@ function update_dubois() {
 
 	//img_offset_x*=-1;
 	img_offset_x=Math.floor(img_offset_x);
-	img_offset_x=Math.floor(img_offset_x);
 	if (img_offset_x < 0) {
 		x_from = 0;
 		x_to   = img_width+img_offset_x;
@@ -614,13 +654,27 @@ function update_dubois() {
 	if (x_to > canvas1.width) {
 		x_to = canvas1.width;
 	}
+
+	img_offset_y=Math.floor(img_offset_y);
+	if (img_offset_y < 0) {
+		y_from = 0;
+		y_to   = img_height+img_offset_y;
+	} else {
+		y_from = +img_offset_y;
+		y_to   = img_height;
+	} 
+
+	if (y_to > canvas1.height) {
+		y_to = canvas1.height;
+	}
 	
 	//index_adj_l2r = (img_offset_x * img_height) * 4;
        
-	for (y = image_loop_order[image_loop]; y < img_height; y+=image_loop_max) {
+	var offset_ptr=-(img_offset_x + img_offset_y  * img_width) * 4;	 
+	for (y = y_from+image_loop_order[image_loop]; y < y_to; y+=image_loop_max) {
 		for (x = x_from ; x < x_to; x++) {
 			var index_o = (x + y  * img_width) * 4;
-			var index_r = index_o + (-img_offset_x * 4);
+			var index_r = index + offset_ptr;
 			var index_l = index_o
 			var indexs  = [index_l, index_r];
 			for (c1 = 0; c1 < 3; c1++) {

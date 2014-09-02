@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
-set -x
+#set -x
 #OUTHTML=index
 GEOM=196x196
+UP_URL="/3D" # URL for main gallery of albums
 QUALITY=75
 
 OUTHTML=i
@@ -35,7 +36,7 @@ touch $GEOM/.done )
 #( cd $GEOM   && for f in *.jpg; do ln "$f" ../${f/.jpg/s.jpg}; done )
 
 (
-	echo "<html><h1>Index <a href=\"$ALTHTML.html\">($ALTTEXT)</a></h1>";
+	echo "<html><h1>Index <a href=\"$ALTHTML.html\">($ALTTEXT)</a> <a href="/3D">(UP)</a></h1>";
 	(i=0;
 		for ff in *_l.jpg
 		do 
@@ -45,7 +46,7 @@ touch $GEOM/.done )
 			then
 				file=$f""_ls.jpg
 			fi
-			echo "<a href=\"w.html?i=$f$TYPE\"><img src=\"$file\" `identify $file.jpg | sed '
+			echo "<a href=\"w.html?i=$f$TYPE\"><img src=\"$file\" `identify $file | sed '
 s/.* JPEG /width="/
 s/ .*/" /
 s/x/" height="/'`></a>";

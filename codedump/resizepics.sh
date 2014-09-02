@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-set -x
+#set -x
 #GEOM=720x540 #For facebook
 #GEOM=2000x1500 #For Google Web
 GEOM=1920x1080
