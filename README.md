@@ -17,6 +17,15 @@ QUICKSTART:
 6) run main.sh (in codedump at the moment) again
 7) Tweak push.sh to point to your public webserver
 8) Run push.sh
+DELETING FILES (after ruuning main.sh)
+Two basic approaches:
+1a) Enter relevant directory.
+1b) Make directory named ".bak"
+1c) Move unwanted files into ".bak"
+1d) rerun make
+OR
+2) Get delphoto.cgi working in your cgi-bin
+(and allow users to delete from website).
 
 ##TODO
 
